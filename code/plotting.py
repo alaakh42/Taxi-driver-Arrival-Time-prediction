@@ -14,7 +14,7 @@ def main():
     filename_train, filename_test = "../data/train.csv", "../data/test.csv"  
 
     # create datasets
-    train, test  = config.load_data(filename_train, filename_test)
+    train, test  = config.load_data(filename_train, filename_test, print_EDA=True)
 
     print("===================== LETS DO SOME PLOTTING =====================")
 
@@ -40,20 +40,12 @@ def main():
     # plt.draw()
     plt.savefig("../plots/Overlab_trainingdata & testdata in Pickup Coordinates.png")
 
-	## Convert datetime features
-    train['pickup_datetime'] = pd.to_datetime(train.pickup_datetime)
-    test['pickup_datetime'] = pd.to_datetime(test.pickup_datetime)
-    train['dropoff_datetime'] = pd.to_datetime(train.dropoff_datetime)
-    train.loc[:, 'pickup_date'] = train['pickup_datetime'].dt.date
-    test.loc[:, 'pickup_date'] = test['pickup_datetime'].dt.date
-    train['dropoff_date'] = train.dropoff_datetime.dt.date
-
-    plt.plot(train.groupby('pickup_date').count()[['id']],'-', label='train')
-    plt.plot(test.groupby('pickup_date').count()[['id']],'-', label='test')
-    plt.title('Train and test period overlap')
-    plt.ylabel('number of records')
-    plt.show()
-    # plt.draw()
+    # plt.plot(train.groupby('pickup_date').count()[['id']],'-', label='train')
+    # plt.plot(test.groupby('pickup_date').count()[['id']],'-', label='test')
+    # plt.title('Train and test period overlap')
+    # plt.ylabel('number of records')
+    # # plt.show()
+    # # plt.draw()
     # plt.savefig("../plots/Overlab_trainingdata & testdata.png")
 
 	#plot dist of trip_duration(dependent variable)

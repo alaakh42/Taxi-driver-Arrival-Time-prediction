@@ -14,7 +14,7 @@ class Config():
 		# self.train_filename = train_filename
 		# self.test_filename = test_filename
 
-	def load_data(self, train_filename, test_filename):
+	def load_data(self, train_filename, test_filename, print_EDA=False):
 
 		self.filename_test =  train_filename
 		self.filename_train = test_filename
@@ -26,27 +26,39 @@ class Config():
 		train = pd.read_csv(train_filename, header=0) #names=train_cols, 
 		test = pd.read_csv(test_filename, header=0) #names=test_cols, 
 
-		print("===================== LETS DO SOME EDA =====================")
+		if print_EDA : 
 
-		# Do some data stats
-		print('We have {} training rows and {} test rows.'.format(train.shape[0], test.shape[0]))
-		print('We have {} training columns and {} test columns.'.format(train.shape[1], test.shape[1]))
-		print(train.head(2))
-		print("============================================================")
-		print(test.head(2))
+			print("===================== LETS DO SOME EDA =====================")
 
-		# Check for NaNs
-		if train.count().min() == train.shape[0] and test.count().min() == test.shape[0]:
-		    print('We do not need to worry about missing values.')
-		else:
-		    print('oops')
-		print('The store_and_fwd_flag has only two values {}.'.format(str(set(train.store_and_fwd_flag.unique()) | set(test.store_and_fwd_flag.unique()))))
-		print('The vendor_id has {}/{} distincit train/test values {}.'.format(str(len(set(train.vendor_id))) , str(len(set(test.vendor_id))), str(set(train.vendor_id.unique()) | set(test.vendor_id.unique()))))
+			# Do some data stats
+			print('We have {} training rows and {} test rows.'.format(train.shape[0], test.shape[0]))
+			print('We have {} training columns and {} test columns.'.format(train.shape[1], test.shape[1]))
+			print(train.head(2))
+			print("============================================================")
+			print(test.head(2))
+
+			# Check for NaNs
+			if train.count().min() == train.shape[0] and test.count().min() == test.shape[0]:
+			    print('We do not need to worry about missing values.')
+			else:
+			    print('oops')
+			print('The store_and_fwd_flag has only two values {}.'.format(str(set(train.store_and_fwd_flag.unique()) | set(test.store_and_fwd_flag.unique()))))
+			print('The vendor_id has {}/{} distincit train/test values {}.'.format(str(len(set(train.vendor_id))) , str(len(set(test.vendor_id))), str(set(train.vendor_id.unique()) | set(test.vendor_id.unique()))))
 
 		gc.collect()
 
 		train.dropna(inplace=True)
 		test.dropna(inplace=True)
+
+		## Convert dates to datetime features
+		train['pickup_datetime'] = pd.to_datetime(train.pickup_datetime)
+		train['dropoff_datetime'] = pd.to_datetime(train.dropoff_datetime)
+		test['pickup_datetime'] = pd.to_datetime(test.pickup_datetime)
+
+		train.loc[:, 'pickup_date'] = train['pickup_datetime'].dt.date
+		train.loc[:, 'dropoff_date'] = train['dropoff_datetime'].dt.date
+		test.loc[:, 'pickup_date'] = test['pickup_datetime'].dt.date
+		
 
 		return train, test
 

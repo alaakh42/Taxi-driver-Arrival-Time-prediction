@@ -2,17 +2,19 @@ import pandas as pd
 import numpy as np
 import datetime as dt
 from data_utils import Config
+import gc
 
 def merge_data():
 	"""
-	
-	"""
+	A function where I do feature extraction 
+	while in the same time merging those features
+	with new data sources """
 
-    config = Config()
-    filename_train, filename_test = "../data/train.csv", "../data/test.csv"  
+	config = Config()
+	filename_train, filename_test = "../data/train.csv", "../data/test.csv"  
 
     # create datasets
-    train, test  = config.load_data(filename_train, filename_test)
+	train, test  = config.load_data(filename_train, filename_test, print_EDA=False)
 
     # 1. datetime features
 	# diff between weekday and day?
@@ -22,7 +24,7 @@ def merge_data():
 	train['pickup_day'] = train.pickup_datetime.dt.day.astype('uint8')
 	train['pickup_weekday'] = train.pickup_datetime.dt.weekday.astype('uint8')
 	train['pickup_minute'] = train.pickup_datetime.dt.minute.astype('uint8')
-	train['pickup_month'] = train.pickup_datetime.dt.month.astype('unit8')
+	train['pickup_month'] = train.pickup_datetime.dt.month.astype('uint8')
 	train['pickup_hour_weekofyear'] = train['pickup_datetime'].dt.weekofyear
 	train['pickup_weekday_hour'] = train['pickup_weekday']*24 + train['pickup_hour']
 
@@ -30,20 +32,20 @@ def merge_data():
 	test['pickup_day'] = test.pickup_datetime.dt.day.astype('uint8')
 	test['pickup_weekday'] = test.pickup_datetime.dt.weekday.astype('uint8')
 	test['pickup_minute'] = test.pickup_datetime.dt.minute.astype('uint8')
-	test['pickup_month'] = test.pickup_datetime.dt.month.astype('unit8')
+	test['pickup_month'] = test.pickup_datetime.dt.month.astype('uint8')
 	test['pickup_hour_weekofyear'] = test['pickup_datetime'].dt.weekofyear
 	test['pickup_weekday_hour'] = test['pickup_weekday']*24 + test['pickup_hour']
 
 	# 2. Location features
 	def haversine(lon1, lat1, lon2, lat2):
-    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = np.sin(dlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.0)**2
-    c = 2 * np.arcsin(np.sqrt(a))
-    km = 6367 * c # AVG_EARTH_RADIUS=6367
-    miles = km *  0.621371
-    return miles
+	    lon1, lat1, lon2, lat2 = map(np.radians, [lon1, lat1, lon2, lat2])
+	    dlon = lon2 - lon1
+	    dlat = lat2 - lat1
+	    a = np.sin(dlat/2.0)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2.0)**2
+	    c = 2 * np.arcsin(np.sqrt(a))
+	    km = 6367 * c # AVG_EARTH_RADIUS=6367
+	    miles = km *  0.621371
+	    return miles
 
 	# def dummy_manhattan_distance(lat1, lng1, lat2, lng2):
 	#     a = haversine_array(lat1, lng1, lat1, lng2)
@@ -65,9 +67,9 @@ def merge_data():
 
 
 	# 3. Use outsource data
-	weatherdata_filename = "data/outsource_data/weather_data_nyc_centralpark_2016.csv"
-	fastestroute_data_train = "data/outsource_data/fastest_train.csv"
-	fastestroute_data_test = "data/outsource_data/fastest_routes_test.csv"
+	weatherdata_filename = "../data/outsource_data/weather_data_nyc_centralpark_2016.csv"
+	fastestroute_data_train = "../data/outsource_data/fastest_train.csv"
+	fastestroute_data_test = "../data/outsource_data/fastest_routes_test.csv"
 
 
 	wd = pd.read_csv(weatherdata_filename, header=0)
@@ -78,11 +80,14 @@ def merge_data():
 	wd['snow depth'] = wd['snow depth'].replace('T', 0.05).astype(np.float32) 
 
 	# Merge training data with weather data on pickup_day
+	print("Merging training data with weather data ....")
 	wd_train = pd.merge(train, wd, on='pickup_day')
 	wd_train = wd_train.drop(['date','maximum temperature','minimum temperature'],axis=1)
+	gc.collect()
 
 	# Merge wd_train with fastestroute_data
 	fastest = pd.read_csv(fastestroute_data_train, header=0)
+	print("Merging Location data with weather and training data ....")
 	wd_train_fastest = pd.merge(wd_train, fastest, on='id', how='outer')
 
 	gc.collect()
@@ -92,7 +97,7 @@ def merge_data():
 
 	print(wd_train_fastest.head(2))
 	print("Semi-final training data shape is: {}".format(wd_train_fastest.shape))
-	print("Training data colmns: {}".format(wd_train_fastest.colmns))
+	print("Training data columns: {}".format(wd_train_fastest.columns))
 
 
 	# Use the same outsource data with test set
@@ -102,16 +107,18 @@ def merge_data():
 	                 'step_maneuvers','step_direction',	'step_location_list']
 	fastest_test = pd.read_csv(fastestroute_data_test, names=ft_test_cols, header=0)
 
+	print("Merging test data with Location data ....")
 	test = pd.merge(test, fastest_test, on='id', how='outer')
 	test = test.drop(['step_location_list','step_direction','step_maneuvers','travel_time_per_step','distance_per_step','street_for_each_step','number_of_steps','starting_street',
 	                  'end_street'], axis=1)
+	print("Merging test data with weather data ....")
 	test = pd.merge(test, wd, on='pickup_day')
 
 	print("===================== CHECK TEST DATA =====================")
 
 	print(test.head(2))
 	print("Semi-final test data shape is: {}".format(test.shape))
-	print("Test data colmns: {}".format(test.colmns))
+	print("Test data columns: {}".format(test.columns))
 
 
 
@@ -148,7 +155,7 @@ def merge_data():
 
 	print(wd_train_fastest.head(2))
 	print("Final training data shape is: {}".format(wd_train_fastest.shape))
-	print("Training data colmns: {}".format(wd_train_fastest.colmns))
+	print("Training data columns: {}".format(wd_train_fastest.columns))
 
 
 	return wd_train_fastest, test
