@@ -1,7 +1,4 @@
-"""
-Credit for EDA code to this kaggle kernel:
-https://www.kaggle.com/gaborfodor/from-eda-to-the-top-lb-0-367
-"""
+
 import numpy as np
 import pandas as pd 
 import gc
