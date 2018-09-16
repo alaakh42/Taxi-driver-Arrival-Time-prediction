@@ -5,7 +5,7 @@ plt.rcParams['figure.figsize'] = [16, 10]
 plt.rcParams['axes.unicode_minus'] = False
 import seaborn as sns
 import datetime as dt
-from data_munging import Config
+from data_utils import Config
 
 
 def main():
@@ -24,7 +24,8 @@ def main():
     plt.title('Distribution of the trip duration')
     plt.ylabel('number of training examples')
     plt.xlabel("trip duration(log)")
-    plt.show()
+    # plt.show()
+    # plt.draw()
     plt.savefig('../plots/Distributionofthe_tripduration.png')
 
 	# plot the overlab of the training data and test data as you don't want them to be too similar
@@ -35,7 +36,8 @@ def main():
     ax[0].scatter(train['pickup_longitude'].values[:N], train['pickup_latitude'].values[:N], color='g', label='train', s=1, alpha=1)
     ax[1].scatter(test['pickup_longitude'].values[:N], test['pickup_latitude'].values[:N], color='b', label='test', s=1, alpha=1)
     plt.title("Overlab of the training data and test data")
-    plt.show()
+    # plt.show()
+    # plt.draw()
     plt.savefig("../plots/Overlab_trainingdata & testdata in Pickup Coordinates.png")
 
 	## Convert datetime features
@@ -51,20 +53,23 @@ def main():
     plt.title('Train and test period overlap')
     plt.ylabel('number of records')
     plt.show()
-    plt.savefig("../plots/Overlab_trainingdata & testdata.png")
+    # plt.draw()
+    # plt.savefig("../plots/Overlab_trainingdata & testdata.png")
 
 	#plot dist of trip_duration(dependent variable)
     fig, ax = plt.subplots(ncols=1, nrows=1)
     sns.distplot(train['trip_duration']/3600,ax=ax,bins=100,kde=False,hist_kws={'log':True})
     plt.title("Distribution of trip_duration(dependent variable)")
-    plt.show()
+    # plt.show()
+    # plt.draw()
     plt.savefig("../plots/Distribution_of_trip_duration(dependent variable).png")
 
     fig, ax = plt.subplots(ncols=1, nrows=1)
     ax.set_xlim(0, 30) # zoom in trip_duration 0-30
     sns.distplot(train['trip_duration']/3600,ax=ax,bins=1000,kde=False,hist_kws={'log':True})
     plt.title("Zoom in Trip Duration from 0-30")
-    plt.show()
+    # plt.show()
+    # plt.draw()
     plt.savefig("../plots/Zoom_in_TripDuration_from_0-30.png")
 
     # plot the pickup and dropoff locations
@@ -73,7 +78,8 @@ def main():
     plt.xlim(-74.1,-73.7)
     ax.scatter(train['pickup_longitude'],train['pickup_latitude'], s=0.01, alpha=1)
     plt.title("Pickup and Dropoff Locations")
-    plt.show()
+    # plt.show()
+    # plt.draw()
     plt.savefig("../plots/Pickup_and_Dropoff_Locations aka (New york city map).png")
 
 
